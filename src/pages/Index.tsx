@@ -20,6 +20,7 @@ const Index = () => {
       <Footer />
       <UploadModal isOpen={uploadOpen} onClose={() => setUploadOpen(false)} />
       <ChatPanel />
+      <AIAssistant />
     </div>
   );
 };
