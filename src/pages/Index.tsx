@@ -15,7 +15,7 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Navbar onUploadClick={() => setUploadOpen(true)} />
       <HeroSection onUploadClick={() => setUploadOpen(true)} />
-      <ProjectFeed />
+      
       <CommunitySection />
       <Footer />
       <UploadModal isOpen={uploadOpen} onClose={() => setUploadOpen(false)} />
