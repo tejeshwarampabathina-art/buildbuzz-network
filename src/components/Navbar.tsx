@@ -11,9 +11,9 @@ const Navbar = ({ onUploadClick }: { onUploadClick: () => void }) => {
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <div className="flex items-center gap-2">
           <div className="gradient-bg h-8 w-8 rounded-lg flex items-center justify-center font-display font-bold text-primary-foreground text-sm">
-            PH
+            SH
           </div>
-          <span className="font-display text-xl font-bold text-foreground">ProjectHub</span>
+          <span className="font-display text-xl font-bold text-foreground">Smart Hub</span>
         </div>
 
         <div className="hidden md:flex items-center gap-1">
