@@ -101,7 +101,7 @@ const ChatPanel = () => {
                   </Avatar>
                   <div>
                     <p className="text-sm font-semibold text-foreground">{activeChat}</p>
-                    <p className="text-xs text-green-400">Online</p>
+                    <p className="text-xs text-accent">Online</p>
                   </div>
                 </div>
               ) : (
