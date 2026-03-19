@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Search, Upload, Bell, Menu, X, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
+import logo from "@/assets/logo.png";
 
 const Navbar = ({ onUploadClick }: { onUploadClick: () => void }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -10,9 +11,7 @@ const Navbar = ({ onUploadClick }: { onUploadClick: () => void }) => {
     <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-background/80 backdrop-blur-xl">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <div className="flex items-center gap-2">
-          <div className="gradient-bg h-8 w-8 rounded-lg flex items-center justify-center font-display font-bold text-primary-foreground text-sm">
-            SH
-          </div>
+          <img src={logo} alt="Smart Hub" className="h-8 w-8 rounded-lg object-contain" />
           <span className="font-display text-xl font-bold text-foreground">Smart Hub</span>
         </div>
 
