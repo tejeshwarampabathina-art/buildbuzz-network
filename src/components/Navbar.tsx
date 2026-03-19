@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Search, Upload, Bell, Menu, X, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
+import logo from "@/assets/logo.png";
 
 const Navbar = ({ onUploadClick }: { onUploadClick: () => void }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
