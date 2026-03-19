@@ -6,6 +6,7 @@ import CommunitySection from "@/components/CommunitySection";
 import UploadModal from "@/components/UploadModal";
 import Footer from "@/components/Footer";
 import ChatPanel from "@/components/ChatPanel";
+import AIAssistant from "@/components/AIAssistant";
 
 const Index = () => {
   const [uploadOpen, setUploadOpen] = useState(false);
