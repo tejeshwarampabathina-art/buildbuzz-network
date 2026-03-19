@@ -11,7 +11,7 @@ const Footer = () => (
             <a key={item} href="#" className="hover:text-foreground transition-colors">{item}</a>
           ))}
         </div>
-        <p className="text-sm text-muted-foreground">© 2026 ProjectHub</p>
+        <p className="text-sm text-muted-foreground">© 2026 Smart Hub</p>
       </div>
     </div>
   </footer>
