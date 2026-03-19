@@ -18,6 +18,7 @@ const Index = () => {
       <CommunitySection />
       <Footer />
       <UploadModal isOpen={uploadOpen} onClose={() => setUploadOpen(false)} />
+      <ChatPanel />
     </div>
   );
 };
