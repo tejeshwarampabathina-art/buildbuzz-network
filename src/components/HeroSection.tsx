@@ -49,13 +49,6 @@ const HeroSection = ({ onUploadClick }: { onUploadClick: () => void }) => {
             </Button>
           </div>
 
-          <div className="mt-12 flex items-center justify-center gap-8 text-muted-foreground text-sm">
-            <div><span className="font-display text-2xl font-bold text-foreground">12K+</span><br />Projects</div>
-            <div className="h-8 w-px bg-border" />
-            <div><span className="font-display text-2xl font-bold text-foreground">5K+</span><br />Creators</div>
-            <div className="h-8 w-px bg-border" />
-            <div><span className="font-display text-2xl font-bold text-foreground">50+</span><br />Communities</div>
-          </div>
         </motion.div>
       </div>
     </section>
