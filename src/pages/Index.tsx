@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
-import ProjectFeed from "@/components/ProjectFeed";
+
 import CommunitySection from "@/components/CommunitySection";
 import UploadModal from "@/components/UploadModal";
 import Footer from "@/components/Footer";
