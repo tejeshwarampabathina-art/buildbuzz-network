@@ -20,6 +20,7 @@ const Index = () => {
       </div>
       <div id="communities">
         <CommunitySection />
+      </div>
       <Footer />
       <UploadModal isOpen={uploadOpen} onClose={() => setUploadOpen(false)} />
       <ChatPanel />
