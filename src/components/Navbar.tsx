@@ -16,13 +16,18 @@ const Navbar = ({ onUploadClick }: { onUploadClick: () => void }) => {
         </div>
 
         <div className="hidden md:flex items-center gap-1">
-          {["Explore", "Communities", "Trending"].map((item) => (
-            <button
-              key={item}
+          {[
+            { label: "Explore", href: "#explore" },
+            { label: "Communities", href: "#communities" },
+            { label: "Trending", href: "#explore" },
+          ].map((item) => (
+            <a
+              key={item.label}
+              href={item.href}
               className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-secondary"
             >
-              {item}
-            </button>
+              {item.label}
+            </a>
           ))}
         </div>
 
@@ -58,10 +63,14 @@ const Navbar = ({ onUploadClick }: { onUploadClick: () => void }) => {
             className="md:hidden border-t border-border bg-background overflow-hidden"
           >
             <div className="p-4 space-y-3">
-              {["Explore", "Communities", "Trending"].map((item) => (
-                <button key={item} className="block w-full text-left px-4 py-2 text-foreground hover:bg-secondary rounded-lg">
-                  {item}
-                </button>
+              {[
+                { label: "Explore", href: "#explore" },
+                { label: "Communities", href: "#communities" },
+                { label: "Trending", href: "#explore" },
+              ].map((item) => (
+                <a key={item.label} href={item.href} onClick={() => setMobileOpen(false)} className="block w-full text-left px-4 py-2 text-foreground hover:bg-secondary rounded-lg">
+                  {item.label}
+                </a>
               ))}
               <Button onClick={onUploadClick} className="w-full gradient-bg text-primary-foreground">
                 <Upload className="h-4 w-4 mr-2" /> Upload Project
