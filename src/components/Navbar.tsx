@@ -1,11 +1,15 @@
 import { useState } from "react";
-import { Search, Upload, Bell, Menu, X, Users } from "lucide-react";
+import { Search, Upload, Bell, Menu, X, LogIn, LogOut, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 import logo from "@/assets/logo.png";
 
 const Navbar = ({ onUploadClick }: { onUploadClick: () => void }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-background/80 backdrop-blur-xl">
@@ -40,13 +44,25 @@ const Navbar = ({ onUploadClick }: { onUploadClick: () => void }) => {
               className="h-9 w-64 rounded-lg bg-secondary pl-9 pr-4 text-sm text-foreground placeholder:text-muted-foreground border border-border focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
             />
           </div>
-          <Button size="icon" variant="ghost" className="text-muted-foreground hover:text-foreground">
-            <Bell className="h-5 w-5" />
-          </Button>
-          <Button onClick={onUploadClick} className="gradient-bg font-medium text-primary-foreground hover:opacity-90 transition-opacity">
-            <Upload className="h-4 w-4 mr-2" />
-            Upload
-          </Button>
+          {user ? (
+            <>
+              <Button size="icon" variant="ghost" className="text-muted-foreground hover:text-foreground">
+                <Bell className="h-5 w-5" />
+              </Button>
+              <Button onClick={onUploadClick} className="gradient-bg font-medium text-primary-foreground hover:opacity-90 transition-opacity">
+                <Upload className="h-4 w-4 mr-2" />
+                Upload
+              </Button>
+              <Button size="icon" variant="ghost" onClick={signOut} className="text-muted-foreground hover:text-foreground">
+                <LogOut className="h-5 w-5" />
+              </Button>
+            </>
+          ) : (
+            <Button onClick={() => navigate("/auth")} className="gradient-bg font-medium text-primary-foreground hover:opacity-90 transition-opacity">
+              <LogIn className="h-4 w-4 mr-2" />
+              Sign In
+            </Button>
+          )}
         </div>
 
         <button className="md:hidden text-foreground" onClick={() => setMobileOpen(!mobileOpen)}>
@@ -72,9 +88,20 @@ const Navbar = ({ onUploadClick }: { onUploadClick: () => void }) => {
                   {item.label}
                 </a>
               ))}
-              <Button onClick={onUploadClick} className="w-full gradient-bg text-primary-foreground">
-                <Upload className="h-4 w-4 mr-2" /> Upload Project
-              </Button>
+              {user ? (
+                <>
+                  <Button onClick={onUploadClick} className="w-full gradient-bg text-primary-foreground">
+                    <Upload className="h-4 w-4 mr-2" /> Upload Project
+                  </Button>
+                  <Button onClick={signOut} variant="outline" className="w-full border-border text-foreground">
+                    <LogOut className="h-4 w-4 mr-2" /> Sign Out
+                  </Button>
+                </>
+              ) : (
+                <Button onClick={() => { navigate("/auth"); setMobileOpen(false); }} className="w-full gradient-bg text-primary-foreground">
+                  <LogIn className="h-4 w-4 mr-2" /> Sign In
+                </Button>
+              )}
             </div>
           </motion.div>
         )}

@@ -3,18 +3,29 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Users, Image, Hash, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 const categoryOptions = [
   "Frontend", "Backend", "Mobile", "AI/ML", "Design", "DevOps", "Open Source", "Other"
 ];
 
-const CreateCommunityModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
+const CreateCommunityModal = ({ isOpen, onClose, onCreated }: { isOpen: boolean; onClose: () => void; onCreated?: () => void }) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
   const [dragOver, setDragOver] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
+    if (!user) {
+      toast.error("Please sign in to create a community");
+      navigate("/auth");
+      return;
+    }
     if (!name.trim()) {
       toast.error("Please enter a community name");
       return;
@@ -23,11 +34,27 @@ const CreateCommunityModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: (
       toast.error("Please enter a description");
       return;
     }
-    toast.success(`Community "${name}" created successfully!`);
-    setName("");
-    setDescription("");
-    setCategory("");
-    onClose();
+
+    setLoading(true);
+    const { error } = await supabase.from("communities").insert({
+      name: name.trim(),
+      description: description.trim(),
+      category: category || "Other",
+      creator_id: user.id,
+    });
+
+    if (error) {
+      toast.error("Failed to create community");
+      console.error(error);
+    } else {
+      toast.success(`Community "${name}" created successfully!`);
+      setName("");
+      setDescription("");
+      setCategory("");
+      onCreated?.();
+      onClose();
+    }
+    setLoading(false);
   };
 
   if (!isOpen) return null;
@@ -126,8 +153,8 @@ const CreateCommunityModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: (
               <Button variant="outline" onClick={onClose} className="flex-1 border-border text-foreground hover:bg-secondary">
                 Cancel
               </Button>
-              <Button onClick={handleCreate} className="flex-1 gradient-bg text-primary-foreground hover:opacity-90 transition-opacity">
-                <Users className="h-4 w-4 mr-2" /> Create Community
+              <Button onClick={handleCreate} disabled={loading} className="flex-1 gradient-bg text-primary-foreground hover:opacity-90 transition-opacity">
+                <Users className="h-4 w-4 mr-2" /> {loading ? "Creating..." : "Create Community"}
               </Button>
             </div>
           </div>
