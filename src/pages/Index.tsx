@@ -5,6 +5,7 @@ import CommunitySection from "@/components/CommunitySection";
 import UploadModal from "@/components/UploadModal";
 import Footer from "@/components/Footer";
 import AIAssistant from "@/components/AIAssistant";
+import ChatPanel from "@/components/ChatPanel";
 
 const Index = () => {
   const [uploadOpen, setUploadOpen] = useState(false);
@@ -19,6 +20,7 @@ const Index = () => {
       <Footer />
       <UploadModal isOpen={uploadOpen} onClose={() => setUploadOpen(false)} />
       <AIAssistant />
+      <ChatPanel />
     </div>
   );
 };
