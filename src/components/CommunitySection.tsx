@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Users, ArrowRight, Plus, Code2, Palette, Brain, Globe, Cpu, Server, GitBranch, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -25,6 +26,7 @@ interface Community {
 }
 
 const CommunitySection = () => {
+  const navigate = useNavigate();
   const [createOpen, setCreateOpen] = useState(false);
   const [communities, setCommunities] = useState<Community[]>([]);
   const [loading, setLoading] = useState(true);
@@ -98,6 +100,7 @@ const CommunitySection = () => {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.3, delay: index * 0.1 }}
                 className="group rounded-xl bg-card border border-border p-6 hover:border-primary/50 hover:card-glow transition-all duration-300 cursor-pointer"
+                onClick={() => navigate(`/community/${community.id}`)}
               >
                 <div className="gradient-bg h-12 w-12 rounded-xl flex items-center justify-center mb-4">
                   <Icon className="h-6 w-6 text-primary-foreground" />

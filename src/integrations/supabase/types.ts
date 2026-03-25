@@ -44,6 +44,135 @@ export type Database = {
         }
         Relationships: []
       }
+      community_groups: {
+        Row: {
+          community_id: string
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          is_private: boolean
+          name: string
+        }
+        Insert: {
+          community_id: string
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          is_private?: boolean
+          name: string
+        }
+        Update: {
+          community_id?: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          is_private?: boolean
+          name?: string
+        }
+        Relationships: []
+      }
+      community_join_requests: {
+        Row: {
+          community_id: string
+          created_at: string
+          id: string
+          message: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          community_id: string
+          created_at?: string
+          id?: string
+          message?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          community_id?: string
+          created_at?: string
+          id?: string
+          message?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      community_meetings: {
+        Row: {
+          community_id: string
+          created_at: string
+          created_by: string
+          description: string | null
+          group_id: string | null
+          id: string
+          max_participants: number | null
+          meeting_url: string | null
+          scheduled_at: string
+          status: string
+          title: string
+        }
+        Insert: {
+          community_id: string
+          created_at?: string
+          created_by: string
+          description?: string | null
+          group_id?: string | null
+          id?: string
+          max_participants?: number | null
+          meeting_url?: string | null
+          scheduled_at: string
+          status?: string
+          title: string
+        }
+        Update: {
+          community_id?: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          group_id?: string | null
+          id?: string
+          max_participants?: number | null
+          meeting_url?: string | null
+          scheduled_at?: string
+          status?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      community_members: {
+        Row: {
+          community_id: string
+          id: string
+          joined_at: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          community_id: string
+          id?: string
+          joined_at?: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          community_id?: string
+          id?: string
+          joined_at?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       conversation_members: {
         Row: {
           conversation_id: string
@@ -108,6 +237,30 @@ export type Database = {
           },
         ]
       }
+      direct_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          receiver_id: string
+          sender_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          receiver_id: string
+          sender_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          receiver_id?: string
+          sender_id?: string
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           content: string
@@ -140,6 +293,30 @@ export type Database = {
           },
         ]
       }
+      meeting_participants: {
+        Row: {
+          id: string
+          joined_at: string
+          left_at: string | null
+          meeting_id: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          joined_at?: string
+          left_at?: string | null
+          meeting_id: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          joined_at?: string
+          left_at?: string | null
+          meeting_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -158,6 +335,48 @@ export type Database = {
           created_at?: string
           id?: string
           username?: string | null
+        }
+        Relationships: []
+      }
+      projects: {
+        Row: {
+          comments_count: number
+          cover_image_url: string | null
+          created_at: string
+          creator_id: string
+          description: string
+          id: string
+          likes_count: number
+          project_url: string | null
+          tags: string[]
+          title: string
+          views_count: number
+        }
+        Insert: {
+          comments_count?: number
+          cover_image_url?: string | null
+          created_at?: string
+          creator_id: string
+          description?: string
+          id?: string
+          likes_count?: number
+          project_url?: string | null
+          tags?: string[]
+          title: string
+          views_count?: number
+        }
+        Update: {
+          comments_count?: number
+          cover_image_url?: string | null
+          created_at?: string
+          creator_id?: string
+          description?: string
+          id?: string
+          likes_count?: number
+          project_url?: string | null
+          tags?: string[]
+          title?: string
+          views_count?: number
         }
         Relationships: []
       }

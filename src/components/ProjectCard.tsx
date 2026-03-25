@@ -6,6 +6,7 @@ interface ProjectCardProps {
   title: string;
   author: string;
   image: string;
+  projectUrl?: string | null;
   likes: number;
   comments: number;
   views: number;
@@ -13,7 +14,17 @@ interface ProjectCardProps {
   index: number;
 }
 
-const ProjectCard = ({ title, author, image, likes, comments, views, tags, index }: ProjectCardProps) => {
+const ProjectCard = ({
+  title,
+  author,
+  image,
+  projectUrl,
+  likes,
+  comments,
+  views,
+  tags,
+  index,
+}: ProjectCardProps) => {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(likes);
 
@@ -36,9 +47,16 @@ const ProjectCard = ({ title, author, image, likes, comments, views, tags, index
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-card/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
-          <button className="gradient-bg text-primary-foreground text-sm font-medium px-4 py-2 rounded-lg flex items-center gap-1 hover:opacity-90 transition-opacity">
-            View Project <ArrowUpRight className="h-4 w-4" />
-          </button>
+          {projectUrl && (
+            <a
+              href={projectUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="gradient-bg text-primary-foreground text-sm font-medium px-4 py-2 rounded-lg flex items-center gap-1 hover:opacity-90 transition-opacity"
+            >
+              View Project <ArrowUpRight className="h-4 w-4" />
+            </a>
+          )}
         </div>
       </div>
 

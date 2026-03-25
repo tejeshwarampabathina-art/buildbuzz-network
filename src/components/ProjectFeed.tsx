@@ -1,49 +1,125 @@
+import { useEffect, useMemo, useState } from "react";
 import ProjectCard from "./ProjectCard";
-import project1 from "@/assets/project-1.jpg";
-import project2 from "@/assets/project-2.jpg";
-import project3 from "@/assets/project-3.jpg";
-import project4 from "@/assets/project-4.jpg";
-import project5 from "@/assets/project-5.jpg";
-import project6 from "@/assets/project-6.jpg";
+import { supabase } from "@/integrations/supabase/client";
 
-const projects = [
-  { title: "DevDash Analytics", author: "Sarah Chen", image: project1, likes: 234, comments: 42, views: 1200, tags: ["React", "Dashboard"] },
-  { title: "FitTrack Mobile", author: "Alex Rivera", image: project2, likes: 189, comments: 31, views: 890, tags: ["Mobile", "Health"] },
-  { title: "StyleVault Store", author: "Maya Patel", image: project3, likes: 312, comments: 56, views: 2100, tags: ["E-commerce", "UI/UX"] },
-  { title: "SocialPulse", author: "James Wilson", image: project4, likes: 156, comments: 28, views: 750, tags: ["Analytics", "Social"] },
-  { title: "ChatGenius AI", author: "Emma Thompson", image: project5, likes: 421, comments: 89, views: 3200, tags: ["AI", "Chatbot"] },
-  { title: "WeatherFlow App", author: "David Kim", image: project6, likes: 267, comments: 45, views: 1500, tags: ["Weather", "Mobile"] },
-];
+interface Project {
+  id: string;
+  creator_id: string;
+  title: string;
+  description: string;
+  project_url: string | null;
+  cover_image_url: string | null;
+  published: boolean;
+  tags: string[];
+  likes_count: number;
+  comments_count: number;
+  views_count: number;
+  created_at: string;
+}
 
-const filters = ["All", "Web Apps", "Mobile", "AI/ML", "E-commerce", "Design", "Open Source"];
+interface Profile {
+  id: string;
+  username: string | null;
+}
 
-const ProjectFeed = () => {
+interface ProjectFeedProps {
+  refreshKey?: number;
+}
+
+const PLACEHOLDER_IMAGE = "/placeholder.svg";
+
+const ProjectFeed = ({ refreshKey = 0 }: ProjectFeedProps) => {
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      setLoading(true);
+      try {
+        const { data: projectRows, error: projectsError } = await supabase
+          .from("projects")
+          .select(
+            "id, creator_id, title, description, project_url, cover_image_url, tags, likes_count, comments_count, views_count, created_at",
+          )
+          .eq("published", true)
+          .order("created_at", { ascending: false });
+
+        if (projectsError) {
+          throw projectsError;
+        }
+
+        const rows = (projectRows ?? []) as Project[];
+        setProjects(rows);
+
+        const creatorIds = Array.from(new Set(rows.map((project) => project.creator_id)));
+        if (creatorIds.length === 0) {
+          setProfiles([]);
+          return;
+        }
+
+        const { data: profileRows, error: profilesError } = await supabase
+          .from("profiles")
+          .select("id, username")
+          .in("id", creatorIds);
+
+        if (profilesError) {
+          throw profilesError;
+        }
+
+        setProfiles((profileRows ?? []) as Profile[]);
+      } catch (error) {
+        console.error("Error fetching projects:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProjects();
+  }, [refreshKey]);
+
+  const profileMap = useMemo(
+    () => new Map(profiles.map((profile) => [profile.id, profile.username || "User"])),
+    [profiles],
+  );
+
   return (
     <section className="container mx-auto px-4 py-16">
       <div className="flex items-center justify-between mb-8">
-        <h2 className="font-display text-3xl font-bold text-foreground">Trending Projects</h2>
+        <h2 className="font-display text-3xl font-bold text-foreground">Projects</h2>
       </div>
 
-      <div className="flex gap-2 mb-8 overflow-x-auto pb-2 scrollbar-hide">
-        {filters.map((filter, i) => (
-          <button
-            key={filter}
-            className={`whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-all ${
-              i === 0
-                ? "gradient-bg text-primary-foreground"
-                : "bg-secondary text-secondary-foreground hover:bg-border"
-            }`}
-          >
-            {filter}
-          </button>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {projects.map((project, index) => (
-          <ProjectCard key={project.title} {...project} index={index} />
-        ))}
-      </div>
+      {loading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[...Array(6)].map((_, idx) => (
+            <div key={idx} className="h-[360px] rounded-xl bg-secondary animate-pulse" />
+          ))}
+        </div>
+      ) : projects.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-border bg-card/40 px-6 py-16 text-center">
+          <h3 className="font-display text-xl font-semibold text-foreground mb-2">No projects yet</h3>
+          <p className="text-muted-foreground max-w-xl mx-auto">
+            Upload your first project and it will be saved in the database.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {projects.map((project, index) => (
+            <ProjectCard
+              key={project.id}
+              index={index}
+              title={project.title}
+              author={profileMap.get(project.creator_id) || "User"}
+              image={project.cover_image_url || PLACEHOLDER_IMAGE}
+              projectUrl={project.project_url}
+              likes={project.likes_count}
+              comments={project.comments_count}
+              views={project.views_count}
+              tags={project.tags?.length ? project.tags : ["project"]}
+            />
+          ))}
+        </div>
+      )}
     </section>
   );
 };

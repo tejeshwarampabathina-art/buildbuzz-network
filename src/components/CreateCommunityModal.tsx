@@ -36,23 +36,40 @@ const CreateCommunityModal = ({ isOpen, onClose, onCreated }: { isOpen: boolean;
     }
 
     setLoading(true);
-    const { error } = await supabase.from("communities").insert({
-      name: name.trim(),
-      description: description.trim(),
-      category: category || "Other",
-      creator_id: user.id,
-    });
+    const { data: community, error } = await supabase
+      .from("communities")
+      .insert({
+        name: name.trim(),
+        description: description.trim(),
+        category: category || "Other",
+        creator_id: user.id,
+        member_count: 1,
+      })
+      .select("id")
+      .single();
 
     if (error) {
       toast.error("Failed to create community");
       console.error(error);
     } else {
+      const { error: membershipError } = await supabase.from("community_members").insert({
+        community_id: community.id,
+        user_id: user.id,
+        role: "admin",
+      });
+
+      if (membershipError) {
+        toast.error("Community created, but membership setup failed");
+        console.error(membershipError);
+      }
+
       toast.success(`Community "${name}" created successfully!`);
       setName("");
       setDescription("");
       setCategory("");
       onCreated?.();
       onClose();
+      navigate(`/community/${community.id}`);
     }
     setLoading(false);
   };

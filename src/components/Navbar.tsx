@@ -1,10 +1,17 @@
 import { useState } from "react";
-import { Search, Upload, Bell, Menu, X, LogIn, LogOut, User } from "lucide-react";
+import { Compass, Flame, LogIn, LogOut, Menu, MessageCircle, Search, Upload, Users, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import logo from "@/assets/logo.png";
+import JoinRequestInbox from "./JoinRequestInbox";
+
+const taskbarItems = [
+  { label: "Explore", href: "#explore", icon: Compass },
+  { label: "Communities", href: "#communities", icon: Users },
+  { label: "Trending", href: "#explore", icon: Flame },
+];
 
 const Navbar = ({ onUploadClick }: { onUploadClick: () => void }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -19,20 +26,20 @@ const Navbar = ({ onUploadClick }: { onUploadClick: () => void }) => {
           <span className="font-display text-xl font-bold text-foreground">Smart Hub</span>
         </div>
 
-        <div className="hidden md:flex items-center gap-1">
-          {[
-            { label: "Explore", href: "#explore" },
-            { label: "Communities", href: "#communities" },
-            { label: "Trending", href: "#explore" },
-          ].map((item) => (
+        <div className="hidden md:flex items-center gap-2 rounded-2xl border border-border bg-card/70 p-1.5 shadow-sm">
+          {taskbarItems.map((item) => {
+            const Icon = item.icon;
+            return (
             <a
               key={item.label}
               href={item.href}
-              className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-secondary"
+              className="flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors hover:bg-secondary"
             >
+              <Icon className="h-4 w-4" />
               {item.label}
             </a>
-          ))}
+          );
+          })}
         </div>
 
         <div className="hidden md:flex items-center gap-3">
@@ -46,8 +53,14 @@ const Navbar = ({ onUploadClick }: { onUploadClick: () => void }) => {
           </div>
           {user ? (
             <>
-              <Button size="icon" variant="ghost" className="text-muted-foreground hover:text-foreground">
-                <Bell className="h-5 w-5" />
+              <JoinRequestInbox userId={user.id} />
+              <Button
+                variant="outline"
+                onClick={() => navigate("/messages")}
+                className="border-border"
+              >
+                <MessageCircle className="h-4 w-4 mr-2" />
+                Messages
               </Button>
               <Button onClick={onUploadClick} className="gradient-bg font-medium text-primary-foreground hover:opacity-90 transition-opacity">
                 <Upload className="h-4 w-4 mr-2" />
@@ -90,6 +103,9 @@ const Navbar = ({ onUploadClick }: { onUploadClick: () => void }) => {
               ))}
               {user ? (
                 <>
+                  <Button onClick={() => { navigate("/messages"); setMobileOpen(false); }} variant="outline" className="w-full border-border text-foreground">
+                    <MessageCircle className="h-4 w-4 mr-2" /> Messages
+                  </Button>
                   <Button onClick={onUploadClick} className="w-full gradient-bg text-primary-foreground">
                     <Upload className="h-4 w-4 mr-2" /> Upload Project
                   </Button>
@@ -98,10 +114,27 @@ const Navbar = ({ onUploadClick }: { onUploadClick: () => void }) => {
                   </Button>
                 </>
               ) : (
-                <Button onClick={() => { navigate("/auth"); setMobileOpen(false); }} className="w-full gradient-bg text-primary-foreground">
+              <Button onClick={() => { navigate("/auth"); setMobileOpen(false); }} className="w-full gradient-bg text-primary-foreground">
                   <LogIn className="h-4 w-4 mr-2" /> Sign In
                 </Button>
               )}
+
+              <div className="grid grid-cols-3 gap-2 pt-2">
+                {taskbarItems.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <a
+                      key={item.label}
+                      href={item.href}
+                      onClick={() => setMobileOpen(false)}
+                      className="rounded-xl border border-border bg-card px-3 py-3 text-center hover:bg-secondary transition-colors"
+                    >
+                      <Icon className="h-4 w-4 mx-auto mb-1" />
+                      <span className="text-xs">{item.label}</span>
+                    </a>
+                  );
+                })}
+              </div>
             </div>
           </motion.div>
         )}
