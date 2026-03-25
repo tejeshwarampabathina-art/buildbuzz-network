@@ -18,6 +18,7 @@ const Index = () => {
       </div>
       <Footer />
       <UploadModal isOpen={uploadOpen} onClose={() => setUploadOpen(false)} />
+      <AIAssistant />
     </div>
   );
 };
