@@ -250,74 +250,97 @@ const ChatPanel = () => {
     if (!user) return;
     setLoading(true);
 
-    // Check if DM already exists
-    const { data: myConvs } = await supabase
-      .from("conversation_members")
-      .select("conversation_id")
-      .eq("user_id", user.id);
+    try {
+      // Check if DM already exists
+      const { data: myConvs } = await supabase
+        .from("conversation_members")
+        .select("conversation_id")
+        .eq("user_id", user.id);
 
-    if (myConvs) {
-      for (const mc of myConvs) {
-        const { data: conv } = await supabase
-          .from("conversations")
-          .select("*")
-          .eq("id", mc.conversation_id)
-          .eq("type", "dm")
-          .single();
-        if (!conv) continue;
-        const { data: otherMember } = await supabase
-          .from("conversation_members")
-          .select("user_id")
-          .eq("conversation_id", conv.id)
-          .eq("user_id", otherUserId)
-          .single();
-        if (otherMember) {
-          // Existing DM found
-          const { data: profile } = await supabase
-            .from("profiles")
-            .select("id, username")
-            .eq("id", otherUserId)
-            .single();
-          setActiveConversation({
-            ...conv,
-            type: conv.type as "dm" | "community",
-            other_user: profile || undefined,
-          });
-          setView("chat");
-          await fetchMessages(conv.id);
-          setLoading(false);
-          return;
+      if (myConvs) {
+        for (const mc of myConvs) {
+          const { data: conv } = await supabase
+            .from("conversations")
+            .select("*")
+            .eq("id", mc.conversation_id)
+            .eq("type", "dm")
+            .maybeSingle();
+          if (!conv) continue;
+          const { data: otherMember } = await supabase
+            .from("conversation_members")
+            .select("user_id")
+            .eq("conversation_id", conv.id)
+            .eq("user_id", otherUserId)
+            .maybeSingle();
+          if (otherMember) {
+            const { data: profile } = await supabase
+              .from("profiles")
+              .select("id, username")
+              .eq("id", otherUserId)
+              .maybeSingle();
+            setActiveConversation({
+              ...conv,
+              type: conv.type as "dm" | "community",
+              other_user: profile || undefined,
+            });
+            setView("chat");
+            await fetchMessages(conv.id);
+            return;
+          }
         }
       }
+
+      // Create new DM conversation
+      const { data: newConv, error: convError } = await supabase
+        .from("conversations")
+        .insert({ type: "dm" })
+        .select()
+        .single();
+
+      if (convError || !newConv) {
+        toast.error(convError?.message || "Failed to create conversation");
+        return;
+      }
+
+      // Insert creator membership first (required for stricter RLS setups)
+      const { error: selfMemberError } = await supabase.from("conversation_members").insert({
+        conversation_id: newConv.id,
+        user_id: user.id,
+      });
+
+      if (selfMemberError) {
+        toast.error(selfMemberError.message || "Failed to join conversation");
+        return;
+      }
+
+      // Add recipient into the DM
+      const { error: otherMemberError } = await supabase.from("conversation_members").insert({
+        conversation_id: newConv.id,
+        user_id: otherUserId,
+      });
+
+      if (otherMemberError) {
+        toast.error(otherMemberError.message || "Failed to add recipient");
+        return;
+      }
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("id, username")
+        .eq("id", otherUserId)
+        .maybeSingle();
+
+      setActiveConversation({
+        ...newConv,
+        type: newConv.type as "dm" | "community",
+        other_user: profile || undefined,
+      });
+      setView("chat");
+      await fetchMessages(newConv.id);
+      await fetchDMs();
+    } finally {
+      setLoading(false);
     }
-
-    // Create new DM
-    const { data: newConv, error } = await supabase
-      .from("conversations")
-      .insert({ type: "dm" })
-      .select()
-      .single();
-    if (error || !newConv) { toast.error("Failed to create conversation"); setLoading(false); return; }
-
-    await supabase.from("conversation_members").insert([
-      { conversation_id: newConv.id, user_id: user.id },
-      { conversation_id: newConv.id, user_id: otherUserId },
-    ]);
-
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("id, username")
-      .eq("id", otherUserId)
-      .single();
-
-    setActiveConversation({
-      ...newConv,
-      type: newConv.type as "dm" | "community",
-      other_user: profile || undefined,
-    });
-    setView("chat");
-    await fetchMessages(newConv.id);
-    setLoading(false);
   };
 
   // Join community chat
@@ -325,36 +348,45 @@ const ChatPanel = () => {
     if (!user) return;
     setLoading(true);
 
-    // Check if community conversation exists
-    const { data: existing } = await supabase
-      .from("conversations")
-      .select("*")
-      .eq("community_id", communityId)
-      .eq("type", "community")
-      .single();
-
-    let conv = existing;
-    if (!conv) {
-      const { data: newConv, error } = await supabase
+    try {
+      const { data: existing } = await supabase
         .from("conversations")
-        .insert({ type: "community", community_id: communityId, name: communityName })
-        .select()
-        .single();
-      if (error || !newConv) { toast.error("Failed to create chat"); setLoading(false); return; }
-      conv = newConv;
+        .select("*")
+        .eq("community_id", communityId)
+        .eq("type", "community")
+        .maybeSingle();
+
+      let conv = existing;
+      if (!conv) {
+        const { data: newConv, error } = await supabase
+          .from("conversations")
+          .insert({ type: "community", community_id: communityId, name: communityName })
+          .select()
+          .single();
+        if (error || !newConv) {
+          toast.error(error?.message || "Failed to create chat");
+          return;
+        }
+        conv = newConv;
+      }
+
+      const { error: joinError } = await supabase.from("conversation_members").upsert(
+        { conversation_id: conv.id, user_id: user.id },
+        { onConflict: "conversation_id,user_id" }
+      );
+
+      if (joinError) {
+        toast.error(joinError.message || "Failed to join chat");
+        return;
+      }
+
+      setActiveConversation({ ...conv, type: conv.type as "dm" | "community" });
+      setView("chat");
+      await fetchMessages(conv.id);
+      await fetchCommunityConvos();
+    } finally {
+      setLoading(false);
     }
-
-    // Join if not already a member
-    await supabase.from("conversation_members").upsert(
-      { conversation_id: conv.id, user_id: user.id },
-      { onConflict: "conversation_id,user_id" }
-    );
-
-    setActiveConversation({ ...conv, type: conv.type as "dm" | "community" });
-    setView("chat");
-    await fetchMessages(conv.id);
-    await fetchCommunityConvos();
-    setLoading(false);
   };
 
   // Fetch users for new DM

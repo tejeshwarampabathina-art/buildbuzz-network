@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import ProjectCard from "./ProjectCard";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
 
 interface Project {
   id: string;
@@ -29,9 +31,11 @@ interface ProjectFeedProps {
 const PLACEHOLDER_IMAGE = "/placeholder.svg";
 
 const ProjectFeed = ({ refreshKey = 0 }: ProjectFeedProps) => {
+  const { user } = useAuth();
   const [projects, setProjects] = useState<Project[]>([]);
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deletingProjectId, setDeletingProjectId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -83,6 +87,43 @@ const ProjectFeed = ({ refreshKey = 0 }: ProjectFeedProps) => {
     [profiles],
   );
 
+  const deleteProject = async (projectId: string) => {
+    if (!user?.id) {
+      toast.error("Please sign in.");
+      return;
+    }
+
+    const project = projects.find((item) => item.id === projectId);
+    if (!project || project.creator_id !== user.id) {
+      toast.error("Only the project creator can delete this post.");
+      return;
+    }
+
+    const confirmed = window.confirm("Delete this project permanently?");
+    if (!confirmed) return;
+
+    setDeletingProjectId(projectId);
+    try {
+      const { error } = await supabase
+        .from("projects")
+        .delete()
+        .eq("id", projectId)
+        .eq("creator_id", user.id);
+
+      if (error) {
+        throw error;
+      }
+
+      setProjects((prev) => prev.filter((item) => item.id !== projectId));
+      toast.success("Project deleted.");
+    } catch (error) {
+      console.error("Error deleting project:", error);
+      toast.error("Failed to delete project.");
+    } finally {
+      setDeletingProjectId(null);
+    }
+  };
+
   return (
     <section className="container mx-auto px-4 py-16">
       <div className="flex items-center justify-between mb-8">
@@ -107,6 +148,7 @@ const ProjectFeed = ({ refreshKey = 0 }: ProjectFeedProps) => {
           {projects.map((project, index) => (
             <ProjectCard
               key={project.id}
+              id={project.id}
               index={index}
               title={project.title}
               author={profileMap.get(project.creator_id) || "User"}
@@ -116,6 +158,9 @@ const ProjectFeed = ({ refreshKey = 0 }: ProjectFeedProps) => {
               comments={project.comments_count}
               views={project.views_count}
               tags={project.tags?.length ? project.tags : ["project"]}
+              canDelete={project.creator_id === user?.id}
+              isDeleting={deletingProjectId === project.id}
+              onDelete={deleteProject}
             />
           ))}
         </div>

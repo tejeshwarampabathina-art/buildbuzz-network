@@ -1,8 +1,9 @@
 import { motion } from "framer-motion";
-import { Heart, MessageCircle, Eye, ArrowUpRight } from "lucide-react";
+import { Heart, MessageCircle, Eye, ArrowUpRight, Trash2 } from "lucide-react";
 import { useState } from "react";
 
 interface ProjectCardProps {
+  id: string;
   title: string;
   author: string;
   image: string;
@@ -12,9 +13,13 @@ interface ProjectCardProps {
   views: number;
   tags: string[];
   index: number;
+  canDelete?: boolean;
+  isDeleting?: boolean;
+  onDelete?: (projectId: string) => void;
 }
 
 const ProjectCard = ({
+  id,
   title,
   author,
   image,
@@ -24,6 +29,9 @@ const ProjectCard = ({
   views,
   tags,
   index,
+  canDelete = false,
+  isDeleting = false,
+  onDelete,
 }: ProjectCardProps) => {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(likes);
@@ -66,6 +74,17 @@ const ProjectCard = ({
             <h3 className="font-display font-semibold text-foreground group-hover:text-primary transition-colors">{title}</h3>
             <p className="text-sm text-muted-foreground">by {author}</p>
           </div>
+          {canDelete && (
+            <button
+              type="button"
+              onClick={() => onDelete?.(id)}
+              disabled={isDeleting}
+              className="rounded-lg p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-50"
+              title="Delete project"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          )}
         </div>
 
         <div className="flex gap-1.5 mb-3 flex-wrap">

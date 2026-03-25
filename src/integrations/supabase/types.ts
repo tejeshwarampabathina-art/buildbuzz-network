@@ -347,6 +347,7 @@ export type Database = {
           description: string
           id: string
           likes_count: number
+          published: boolean
           project_url: string | null
           tags: string[]
           title: string
@@ -360,6 +361,7 @@ export type Database = {
           description?: string
           id?: string
           likes_count?: number
+          published?: boolean
           project_url?: string | null
           tags?: string[]
           title: string
@@ -373,6 +375,7 @@ export type Database = {
           description?: string
           id?: string
           likes_count?: number
+          published?: boolean
           project_url?: string | null
           tags?: string[]
           title?: string
